@@ -1,0 +1,49 @@
+@use "sass:map";
+@use "variables" as v;
+
+@mixin respond-to($breakpoint) {
+  $breakpoints: (
+    "sm": v.$breakpoint-sm,
+    "md": v.$breakpoint-md,
+    "lg": v.$breakpoint-lg,
+    "xl": v.$breakpoint-xl,
+  );
+
+  @media (min-width: map.get($breakpoints, $breakpoint)) {
+    @content;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin card {
+  background: v.$color-surface;
+  border: 1px solid v.$color-border;
+  border-radius: v.$radius-lg;
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: v.$color-border;
+    border-radius: v.$radius-sm;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
