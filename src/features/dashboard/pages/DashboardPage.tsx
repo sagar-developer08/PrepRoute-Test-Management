@@ -9,6 +9,7 @@ import { EmptyState } from "@/shared/components/EmptyState";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { formatDate } from "@/shared/utils/formatDate";
 import { useTestsList } from "@/features/tests/hooks/useTests";
+import { useSubjects } from "@/features/metadata";
 import { TestStatusBadge } from "../components/TestStatusBadge";
 import { TestRowActions } from "../components/TestRowActions";
 
@@ -17,19 +18,30 @@ const PAGE_SIZE = 10;
 export function DashboardPage() {
   const navigate = useNavigate();
   const { data: tests, isLoading, isError, error } = useTestsList();
+  const { data: subjects = [] } = useSubjects();
   const [search, setSearch] = React.useState("");
   const [page, setPage] = React.useState(1);
   const debouncedSearch = useDebounce(search, 250);
+
+  // Build UUID → subject name lookup
+  const subjectMap = React.useMemo(
+    () => new Map(subjects.map((s) => [s.id, s.name])),
+    [subjects],
+  );
 
   const filteredTests = React.useMemo(() => {
     if (!tests) return [];
     const query = debouncedSearch.trim().toLowerCase();
     if (!query) return tests;
     return tests.filter(
-      (test) =>
-        test.name.toLowerCase().includes(query) ||
-        test.subject?.toLowerCase().includes(query) ||
-        test.status?.toLowerCase().includes(query),
+      (test) => {
+        const subjectName = subjectMap.get(test.subject ?? "") ?? test.subject ?? "";
+        return (
+          test.name.toLowerCase().includes(query) ||
+          subjectName.toLowerCase().includes(query) ||
+          test.status?.toLowerCase().includes(query)
+        );
+      },
     );
   }, [tests, debouncedSearch]);
 
@@ -115,7 +127,9 @@ export function DashboardPage() {
                   onClick={() => navigate(`/tests/${test.id}/publish`)}
                 >
                   <TableCell className="font-medium text-foreground">{test.name}</TableCell>
-                  <TableCell className="text-muted">{test.subject}</TableCell>
+                  <TableCell className="text-muted">
+                    {subjectMap.get(test.subject ?? "") ?? test.subject ?? "—"}
+                  </TableCell>
                   <TableCell className="text-muted">
                     {(test.questions?.length ?? 0)}/{test.total_questions}
                   </TableCell>
