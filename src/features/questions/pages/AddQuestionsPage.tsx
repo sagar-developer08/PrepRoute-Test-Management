@@ -10,6 +10,7 @@ import { useCreateQuestion, useDeleteQuestion, useUpdateQuestion } from "../hook
 import { isSlotFilled, useQuestionSlots } from "../hooks/useQuestionSlots";
 import { QuestionSidebarList } from "../components/QuestionSidebarList";
 import { QuestionEditor } from "../components/QuestionEditor";
+import { useTopics, useSubTopics } from "@/features/metadata";
 import type { QuestionInput } from "../types";
 
 export function AddQuestionsPage() {
@@ -22,6 +23,19 @@ export function AddQuestionsPage() {
   const createQuestion = useCreateQuestion();
   const updateQuestion = useUpdateQuestion();
   const deleteQuestion = useDeleteQuestion();
+
+  const { data: topicsData = [] } = useTopics(test?.subject ?? undefined);
+  const { data: subTopicsData = [] } = useSubTopics(test?.topics ?? []);
+
+  const testTopics = React.useMemo(() => {
+    if (!test?.topics) return [];
+    return topicsData.filter((t) => test.topics!.includes(t.id));
+  }, [test?.topics, topicsData]);
+
+  const testSubTopics = React.useMemo(() => {
+    if (!test?.sub_topics) return [];
+    return subTopicsData.filter((st) => test.sub_topics!.includes(st.id));
+  }, [test?.sub_topics, subTopicsData]);
 
   const {
     slots,
@@ -142,8 +156,8 @@ export function AddQuestionsPage() {
               slot={activeSlot}
               index={activeIndex}
               total={slots.length}
-              testTopics={test.topics}
-              testSubTopics={test.sub_topics}
+              testTopics={testTopics}
+              testSubTopics={testSubTopics}
               onChange={(patch) => updateSlot(activeIndex, patch)}
               onDeleteAll={handleDeleteAll}
               onPrev={handlePrev}

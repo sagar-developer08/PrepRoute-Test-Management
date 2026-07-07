@@ -13,8 +13,8 @@ interface QuestionEditorProps {
   slot: QuestionSlot;
   index: number;
   total: number;
-  testTopics: string[];
-  testSubTopics: string[];
+  testTopics: { id: string; name: string }[];
+  testSubTopics: { id: string; name: string }[];
   onChange: (patch: Partial<QuestionSlot>) => void;
   onDeleteAll: () => void;
   onPrev: () => void;
@@ -149,8 +149,8 @@ export function QuestionEditor({
             </SelectTrigger>
             <SelectContent>
               {testTopics.map((topic) => (
-                <SelectItem key={topic} value={topic}>
-                  {topic}
+                <SelectItem key={topic.id} value={topic.id}>
+                  {topic.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -165,8 +165,8 @@ export function QuestionEditor({
             </SelectTrigger>
             <SelectContent>
               {testSubTopics.map((subTopic) => (
-                <SelectItem key={subTopic} value={subTopic}>
-                  {subTopic}
+                <SelectItem key={subTopic.id} value={subTopic.id}>
+                  {subTopic.name}
                 </SelectItem>
               ))}
             </SelectContent>
