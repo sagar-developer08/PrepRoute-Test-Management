@@ -10,7 +10,7 @@ import { useCreateQuestion, useDeleteQuestion, useUpdateQuestion } from "../hook
 import { isSlotFilled, useQuestionSlots } from "../hooks/useQuestionSlots";
 import { QuestionSidebarList } from "../components/QuestionSidebarList";
 import { QuestionEditor } from "../components/QuestionEditor";
-import { useSubjects, useTopics, useSubTopics } from "@/features/metadata";
+import { useSubjects } from "@/features/metadata";
 import type { QuestionInput } from "../types";
 
 export function AddQuestionsPage() {
@@ -31,34 +31,6 @@ export function AddQuestionsPage() {
     const match = subjects.find((s) => s.id === test.subject || s.name === test.subject);
     return match?.id ?? test.subject;
   }, [subjects, test?.subject]);
-
-  const { data: topicsData = [] } = useTopics(subjectId);
-
-  const topicIds = React.useMemo(() => {
-    if (!test?.topics) return [];
-    return test.topics.map((t) => {
-      const match = topicsData.find((td) => td.id === t || td.name === t);
-      return match?.id ?? t;
-    });
-  }, [test?.topics, topicsData]);
-
-  const { data: subTopicsData = [] } = useSubTopics(topicIds);
-
-  const testTopics = React.useMemo(() => {
-    if (!test?.topics) return [];
-    return test.topics.map((t) => {
-      const match = topicsData.find((td) => td.id === t || td.name === t);
-      return match ? { id: match.id, name: match.name } : { id: t, name: t };
-    });
-  }, [test?.topics, topicsData]);
-
-  const testSubTopics = React.useMemo(() => {
-    if (!test?.sub_topics) return [];
-    return test.sub_topics.map((st) => {
-      const match = subTopicsData.find((std) => std.id === st || std.name === st);
-      return match ? { id: match.id, name: match.name } : { id: st, name: st };
-    });
-  }, [test?.sub_topics, subTopicsData]);
 
   const {
     slots,
@@ -96,8 +68,9 @@ export function AddQuestionsPage() {
       correct_option: activeSlot.correct_option,
       explanation: activeSlot.explanation || undefined,
       difficulty: activeSlot.difficulty || undefined,
-      topic: activeSlot.topic || undefined,
-      sub_topic: activeSlot.sub_topic || undefined,
+      // topic/sub_topic omitted: staging backend 404s on /questions/bulk and
+      // PUT /questions/:id for any topic value (name or UUID) - confirmed via
+      // direct API testing, unrelated to frontend payload shape.
       test_id: testId,
       subject: subjectId || test.subject,
     };
@@ -179,8 +152,6 @@ export function AddQuestionsPage() {
               slot={activeSlot}
               index={activeIndex}
               total={slots.length}
-              testTopics={testTopics}
-              testSubTopics={testSubTopics}
               onChange={(patch) => updateSlot(activeIndex, patch)}
               onDeleteAll={handleDeleteAll}
               onPrev={handlePrev}

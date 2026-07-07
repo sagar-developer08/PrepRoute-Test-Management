@@ -2,9 +2,8 @@ import { Bold, ChevronLeft, ChevronRight, Italic, Link2, List, Trash2, Underline
 import { Label } from "@/ui/label";
 import { Textarea } from "@/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
 import { cn } from "@/shared/lib/utils";
-import type { CorrectOption, QuestionDifficulty } from "../types";
+import type { CorrectOption } from "../types";
 import type { QuestionSlot } from "../hooks/useQuestionSlots";
 
 const OPTION_KEYS = ["option1", "option2", "option3", "option4"] as const;
@@ -13,8 +12,6 @@ interface QuestionEditorProps {
   slot: QuestionSlot;
   index: number;
   total: number;
-  testTopics: { id: string; name: string }[];
-  testSubTopics: { id: string; name: string }[];
   onChange: (patch: Partial<QuestionSlot>) => void;
   onDeleteAll: () => void;
   onPrev: () => void;
@@ -27,8 +24,6 @@ export function QuestionEditor({
   slot,
   index,
   total,
-  testTopics,
-  testSubTopics,
   onChange,
   onDeleteAll,
   onPrev,
@@ -119,59 +114,6 @@ export function QuestionEditor({
         <button type="button" onClick={onNext} disabled={!canNext} className="disabled:opacity-30">
           <ChevronRight className="size-5" />
         </button>
-      </div>
-
-      <div className="flex flex-col gap-4 border-t border-border pt-5">
-        <h3 className="text-sm font-semibold text-foreground">Question settings</h3>
-
-        <div className="flex flex-col gap-1.5">
-          <Label>Level of Difficulty</Label>
-          <Select
-            value={slot.difficulty || undefined}
-            onValueChange={(value) => onChange({ difficulty: value as QuestionDifficulty })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select from Drop-down" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="easy">Easy</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="difficult">Difficult</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label>Topic</Label>
-          <Select value={slot.topic || undefined} onValueChange={(value) => onChange({ topic: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select from Drop-down" />
-            </SelectTrigger>
-            <SelectContent>
-              {testTopics.map((topic) => (
-                <SelectItem key={topic.id} value={topic.id}>
-                  {topic.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label>Sub-topic</Label>
-          <Select value={slot.sub_topic || undefined} onValueChange={(value) => onChange({ sub_topic: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select from Drop-down" />
-            </SelectTrigger>
-            <SelectContent>
-              {testSubTopics.map((subTopic) => (
-                <SelectItem key={subTopic.id} value={subTopic.id}>
-                  {subTopic.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
     </div>
   );
