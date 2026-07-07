@@ -10,7 +10,7 @@ import { useCreateQuestion, useDeleteQuestion, useUpdateQuestion } from "../hook
 import { isSlotFilled, useQuestionSlots } from "../hooks/useQuestionSlots";
 import { QuestionSidebarList } from "../components/QuestionSidebarList";
 import { QuestionEditor } from "../components/QuestionEditor";
-import { useTopics, useSubTopics } from "@/features/metadata";
+import { useSubjects, useTopics, useSubTopics } from "@/features/metadata";
 import type { QuestionInput } from "../types";
 
 export function AddQuestionsPage() {
@@ -24,17 +24,40 @@ export function AddQuestionsPage() {
   const updateQuestion = useUpdateQuestion();
   const deleteQuestion = useDeleteQuestion();
 
-  const { data: topicsData = [] } = useTopics(test?.subject ?? undefined);
-  const { data: subTopicsData = [] } = useSubTopics(test?.topics ?? []);
+  const { data: subjects = [] } = useSubjects();
+
+  const subjectId = React.useMemo(() => {
+    if (!test?.subject) return undefined;
+    const match = subjects.find((s) => s.id === test.subject || s.name === test.subject);
+    return match?.id ?? test.subject;
+  }, [subjects, test?.subject]);
+
+  const { data: topicsData = [] } = useTopics(subjectId);
+
+  const topicIds = React.useMemo(() => {
+    if (!test?.topics) return [];
+    return test.topics.map((t) => {
+      const match = topicsData.find((td) => td.id === t || td.name === t);
+      return match?.id ?? t;
+    });
+  }, [test?.topics, topicsData]);
+
+  const { data: subTopicsData = [] } = useSubTopics(topicIds);
 
   const testTopics = React.useMemo(() => {
     if (!test?.topics) return [];
-    return topicsData.filter((t) => test.topics!.includes(t.id));
+    return test.topics.map((t) => {
+      const match = topicsData.find((td) => td.id === t || td.name === t);
+      return match ? { id: match.id, name: match.name } : { id: t, name: t };
+    });
   }, [test?.topics, topicsData]);
 
   const testSubTopics = React.useMemo(() => {
     if (!test?.sub_topics) return [];
-    return subTopicsData.filter((st) => test.sub_topics!.includes(st.id));
+    return test.sub_topics.map((st) => {
+      const match = subTopicsData.find((std) => std.id === st || std.name === st);
+      return match ? { id: match.id, name: match.name } : { id: st, name: st };
+    });
   }, [test?.sub_topics, subTopicsData]);
 
   const {
@@ -76,7 +99,7 @@ export function AddQuestionsPage() {
       topic: activeSlot.topic || undefined,
       sub_topic: activeSlot.sub_topic || undefined,
       test_id: testId,
-      subject: test.subject,
+      subject: subjectId || test.subject,
     };
 
     try {
