@@ -201,7 +201,7 @@ export function TestForm({
     onSubmit({
       name: values.name,
       type: values.type,
-      subject: values.subjectId,
+      subject: subjectName,
       topics: values.topicIds,
       sub_topics: values.subTopicIds,
       correct_marks: values.correct_marks,
